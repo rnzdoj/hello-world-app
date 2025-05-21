@@ -28,7 +28,7 @@ pipeline {
     stage('Update Manifests') {
       steps {
         bat '''
-          powershell -Command "(Get-Content k8s/deployment.yaml) -replace 'image:.*', 'image: ''rnzdoj/hello-world-app:latest''' | Set-Content k8s/deployment.yaml"
+          powershell -Command "(Get-Content k8s/deployment.yaml) -replace 'image:.*', 'image: \\'rnzdoj/hello-world-app:latest\\'' | Set-Content k8s/deployment.yaml"
           git config user.email "rinzin.bhutan.asia@gmail.com"
           git config user.name "rnzdoj"
           git add k8s/deployment.yaml
