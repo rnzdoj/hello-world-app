@@ -1,14 +1,16 @@
 pipeline {
   agent any
 
-  environment {
-    IMAGE = "rnzdoj/hello-world-app:${BUILD_NUMBER}"
-  }
-
   stages {
+    stage('Checkout') {
+      steps {
+          checkout scm
+      }
+    }
+
     stage('Build Image') {
       steps {
-        bat 'docker build -t $IMAGE .'
+        bat 'docker build -t rnzdoj/hello-world-app:latest .'
       }
     }
 
@@ -16,7 +18,7 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
           bat 'echo $PASS | docker login -u $USER --password-stdin'
-          bat 'docker push $IMAGE'
+          bat 'docker push rnzdoj/hello-world-app:latest'
         }
       }
     }
@@ -24,11 +26,11 @@ pipeline {
     stage('Update Manifests') {
       steps {
         bat '''
-          sed -i "s|image:.*|image: $IMAGE|g" k8s/deployment.yaml
-          git config user.email "ci@example.com"
-          git config user.name "jenkins"
+          sed -i "s|image:.*|image: 'rnzdoj/hello-world-app:latest'|g" k8s/deployment.yaml
+          git config user.email "rinzin.bhutan.asia@gmail.com"
+          git config user.name "rnzdoj"
           git add k8s/deployment.yaml
-          git commit -m "Update image to $IMAGE"
+          git commit -m "Update image to rnzdoj/hello-world-app:latest"
           git push origin main
         '''
       }
