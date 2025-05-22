@@ -1,7 +1,7 @@
 pipeline {
   agent any
 
-  envirnoment {
+  environment {
     IMAGE_NAME = "rnzdoj/hello-world-app:%BUILD_NUMBER%"
   }
 
