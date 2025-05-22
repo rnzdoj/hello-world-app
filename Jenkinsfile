@@ -37,6 +37,7 @@ pipeline {
         bat """
           git config user.email "rinzin.bhutan.asia@gmail.com"
           git config user.name "rnzdoj"
+          git checkout main
           git add k8s/deployment.yaml
           git commit -m \"Update image to %IMAGE_TAG%\"
           git push origin main
