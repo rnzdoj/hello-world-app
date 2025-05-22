@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    IMAGE = "rnzdoj/hello-world-app:${env.BUILD_NUMBER}"
+    IMAGE_TAG = "rnzdoj/hello-world-app:${BUILD_NUMBER}"
   }
 
   stages {
@@ -14,9 +14,7 @@ pipeline {
 
     stage('Build Image') {
       steps {
-        bat """
-          docker build -t %IMAGE% .
-        """
+        bat "docker build -t %IMAGE_TAG% ."
       }
     }
 
@@ -25,7 +23,7 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
           bat """
             echo %PASS% | docker login -u %USER% --password-stdin
-            docker push %IMAGE%
+            docker push %IMAGE_TAG%
           """
         }
       }
@@ -34,17 +32,22 @@ pipeline {
     stage('Update Manifests') {
       steps {
         bat """
-          powershell -Command "(Get-Content k8s/deployment.yaml) -replace 'image:.*', 'image: ${IMAGE}' | Set-Content k8s/deployment.yaml"
+          powershell -Command "(Get-Content k8s/deployment.yaml) -replace 'image:.*', 'image: %IMAGE_TAG%' | Set-Content k8s/deployment.yaml"
         """
-
         bat """
           git config user.email "rinzin.bhutan.asia@gmail.com"
           git config user.name "rnzdoj"
           git add k8s/deployment.yaml
-          git commit -m "Update image to ${IMAGE}"
+          git commit -m \"Update image to %IMAGE_TAG%\"
           git push origin main
         """
       }
+    }
+  }
+
+  post {
+    failure {
+      echo "Build failed at stage: ${env.STAGE_NAME}"
     }
   }
 }
