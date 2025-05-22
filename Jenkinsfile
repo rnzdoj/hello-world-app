@@ -40,7 +40,7 @@ pipeline {
           git checkout main
           git add k8s/deployment.yaml
           git commit -m \"Update image to %IMAGE_TAG%\"
-          git push origin main
+          git push origin main --verbose
         """
       }
     }
